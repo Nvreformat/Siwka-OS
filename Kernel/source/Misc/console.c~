@@ -1,0 +1,135 @@
+#include <Siwka/console.h>
+#include <Siwka/string.h>
+#include <Siwka/text.h>
+#include <Siwka/framebuffer.h>
+
+char CommandBuffer[16];
+uint32_t CommandLength = 0;
+
+extern char* Framebuffer;
+extern FramebufferDescription FramebufferInfo;
+
+int CursorX = 0;
+int CursorY = 1;
+char[56] ConsoleString = "> ";
+
+extern "C" void memcpy(void* src, void* dst, size_t size);
+void ConsolePrintChar(int Character);
+
+void ConsoleOnKeyPressed(char Character)
+{
+	ScreenSetFont(1);
+	ScreenSetColors(0x000000, 0xFFFFFF);
+
+	if (Character == 10)
+	{
+		ConsolePrintChar('\n');
+		
+		if (CommandLength > 0)
+		{
+			//ExecuteCommand(CommandBuffer);
+		}
+		
+		ConsolePrintString(ConsoleString);	
+		CommandLength = 0;
+	}
+	else
+	{
+		if (CommandLength < (sizeof(CommandBuffer) - 1))
+		{
+			CommandBuffer[CommandLength] = Character;
+			CommandBuffer[CommandLength + 1] = '\0';
+			++CommandLength;
+			
+			ConsolePrintChar(Character);
+		}	
+	}
+}
+
+void ConsolePrintChar(int Character)
+{
+	if (Character == '\n')
+	{
+		CursorX = 0;
+	
+		if (CursorY < (CHAR_COUNT_Y - 1))
+		{
+			++CursorY;
+		}
+		else
+		{
+			ConsoleScroll();
+		}
+			
+		return;
+	}
+
+	ScreenPutChar(Character, CursorX, CursorY);
+	
+	++CursorX;
+	if (CursorX == CHAR_COUNT_X)
+	{
+		CursorX = 0;	
+		
+		if (CursorY < (CHAR_COUNT_Y - 1))
+		{
+			++CursorY;
+		}
+		else
+		{
+			ConsoleScroll();
+		}
+	}
+}
+
+void ConsolePrintString(const char* Text)
+{
+	int i = 0;
+
+	while(1)
+	{	
+		char Character = Text[i];
+		
+		if (Character == '\0')
+		{
+			break;
+		}
+		
+		ConsolePrintChar(Character);
+		
+		i++;
+	}
+}
+
+void ConsoleClear()
+{
+	for (int Y = 1; Y < CHAR_COUNT_Y; ++Y)
+	{
+		for (int X = 0; X < CHAR_COUNT_X; ++X)
+		{
+			ScreenPutChar(' ', X, Y);
+		}
+	}
+	
+	CursorX = 0;
+	CursorY = 1;
+	
+	ScreenSetFont(1);
+	ConsolePrintString(ConsoleString);
+}
+
+void ConsolePrintLine(const char* Text)
+{
+	ConsolePrintString(Text);
+	ConsolePrintChar('\n');
+}
+
+void ConsoleScroll()
+{
+	memcpy(Framebuffer + (FramebufferInfo.Pitch * 28 * 2), Framebuffer + (FramebufferInfo.Pitch * 28), (FramebufferInfo.Pitch * 28 * (CHAR_COUNT_Y - 2)));
+	
+	for (int X = 0; X < CHAR_COUNT_X; ++X)
+	{
+		ScreenPutChar(' ', X, CHAR_COUNT_Y - 1);
+	}
+}

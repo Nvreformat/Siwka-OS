@@ -1,0 +1,37 @@
+#include <USPI/uspi.h>
+#include <Siwka/memory.h>
+#include <Siwka/interrupt.h>
+#include <Siwka/timer.h>
+#include <Siwka/sysutils.h>
+#include <Siwka/text.h>
+#include <Siwka/framebuffer.h>
+#include <Siwka/sysconfig.h>
+#include <Siwka/memutil.h>
+
+void KernelMain();
+
+extern "C"
+void SystemInit(void)
+{
+	#if RASPPI != 1
+	InvalidateDataCache ();
+	#endif
+
+	extern unsigned char __BSS_START;
+	extern unsigned char __BSS_END;
+	for(unsigned char *BSS = &__BSS_START; BSS < &__BSS_END; BSS++)
+	{
+		*BSS = 0;
+	}
+	
+	SetupMemory();
+	SetupFramebuffer();
+	SetupScreen();
+	SetupInterrupts();
+	SetupTimer();
+	USPiInitialize();
+
+	KernelMain();
+	
+	Halt();
+}

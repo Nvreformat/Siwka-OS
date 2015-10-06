@@ -1,0 +1,35 @@
+RASPPI ?= 1
+PREFIX ?= arm-none-eabi-
+MAP = kernel.map
+
+CC = $(PREFIX)g++
+AS = $(CC)
+LD = $(PREFIX)ld
+AR = $(PREFIX)ar
+
+ifeq ($(strip $(RASPPI)),1)
+ARCH ?= -march=armv6j -mtune=arm1176jzf-s -mfloat-abi=hard 
+else
+ARCH ?= -march=armv7-a -mtune=cortex-a7 -mfloat-abi=hard
+endif
+AFLAGS += $(ARCH) -g -I include -DRASPPI=$(RASPPI)
+CFLAGS += $(ARCH) -g -I include -Wall -fsigned-char -include ../../Common/default.h -DRASPPI=$(RASPPI) -O
+
+SOURCE = source/
+BUILD = build/
+
+OBJS += $(patsubst $(SOURCE)%.S, $(BUILD)%.o, $(wildcard $(SOURCE)*.S)) $(patsubst $(SOURCE)%.c, $(BUILD)%.o, $(wildcard $(SOURCE)*.c))
+
+$(BUILD)%.o: $(SOURCE)%.S $(BUILD)
+	$(AS) $(AFLAGS) -c -o $@ $<
+
+$(BUILD)%.o: $(SOURCE)%.c $(BUILD)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+all: stdlib
+
+stdlib: $(OBJS)
+	$(AR) cr ../Common/swikapi.a $(OBJS) 
+
+clean:
+	rm -rf *.o *.elf *.lst *.img *.cir *.map *~ $(EXTRACLEAN)

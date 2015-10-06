@@ -1,0 +1,34 @@
+#include <USPI/uspi.h>
+#include <Siwka/string.h>
+#include <Siwka/memutil.h>
+#include <Siwka/memory.h>
+#include <Siwka/propertytags.h>
+#include <Siwka/interrupt.h>
+#include <Siwka/console.h>
+#include <Siwka/sysutils.h>
+
+char Test[50] = "asdasd ";
+
+class a
+{
+
+};
+
+void* operator new(size_t Size)
+{
+
+}
+
+void KernelMain(void)
+{
+	static uint8_t ReceiveBuffer[1600];
+	unsigned int FrameLength = 0;
+	
+	a* test = new a();
+	
+	unsigned int ret = USPiReceiveFrame(ReceiveBuffer, &FrameLength);	
+		
+	ConsolePrintLine(StringFormat(Test, "StringFormat Secret Code: %% %% %X", &ReceiveBuffer));
+}
+
+

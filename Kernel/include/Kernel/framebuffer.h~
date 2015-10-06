@@ -1,0 +1,22 @@
+#ifndef FRAMEBUFFER_H
+#define FRAMEBUFFER_H
+
+typedef struct
+{
+	unsigned Width;
+	unsigned Height;
+	unsigned VirtualWidth;
+	unsigned VirtualHeight;
+	unsigned Pitch;
+	unsigned BitDepth;
+	unsigned X;
+	unsigned Y;
+	unsigned* Pointer;
+	unsigned Size;
+} FramebufferDescription;
+
+void SetupFramebuffer();
+inline void DrawPixel(int X, int Y);
+void DrawLine(int x1, int y1, int x2, int y2, int Stroke);
+
+#endif

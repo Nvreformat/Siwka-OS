@@ -1,0 +1,23 @@
+#include <Siwka/framebuffer.h>
+#include <Siwka/mailbox.h>
+
+FramebufferDescription FramebufferInfo __attribute__ ((__aligned__(64))) = {0};
+char* Framebuffer;
+
+void SetupFramebuffer()
+{
+	FramebufferInfo.Width = 1920;
+	FramebufferInfo.Height = 1080;
+	FramebufferInfo.VirtualWidth = 1920;
+	FramebufferInfo.VirtualHeight = 1080;
+	FramebufferInfo.Pitch = 0;
+	FramebufferInfo.BitDepth = 24;
+	FramebufferInfo.X = 0;
+	FramebufferInfo.Y = 0;
+	FramebufferInfo.Pointer = 0;
+	FramebufferInfo.Size = 0;
+	
+	MailBoxWriteRead(1, (u32)(&FramebufferInfo) + 0x40000000);
+	
+	Framebuffer = (char*) FramebufferInfo.Pointer;
+}
